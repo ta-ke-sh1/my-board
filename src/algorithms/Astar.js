@@ -20,19 +20,20 @@ export function aStar(grid, startNode, endNode) {
         var neighbors = getNeighbors(currentNode, grid);
         for (var neighbor of neighbors) {
             let path = currentNode.s + 1;
-            if (path < neighbor.score) {
+            if (path < neighbor.s) {
                 neighbor.s = path;
                 neighbor.previousNode = currentNode;
                 neighbor.h = Heuristic(neighbor, endNode);
                 neighbor.f = path + neighbor.h;
             }
         }
-        console.log(neighbors);
     }
 }
 
 function sortNodesByFinal(unvisitedNodes) {
-    unvisitedNodes.sort((nodeA, nodeB) => { return nodeA.f - nodeB.f } );
+    unvisitedNodes.sort((nodeA, nodeB) => {
+        return nodeA.f - nodeB.f;
+    });
 }
 
 function getAllNodes(grid) {
@@ -58,7 +59,7 @@ function getNeighbors(node, grid) {
     if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
     if (col > 0) neighbors.push(grid[row][col - 1]);
     if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-    return neighbors.filter(neighbor => !neighbor.isVisited);
+    return neighbors.filter((neighbor) => !neighbor.isVisited);
 }
 
 export function getNodesShortestPathAstar(endNode) {
@@ -70,4 +71,3 @@ export function getNodesShortestPathAstar(endNode) {
     }
     return nodesInShortestPathOrder;
 }
-

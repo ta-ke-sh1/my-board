@@ -1,14 +1,15 @@
-import React from 'react';
-import './Styles/board.css';
+import React from "react";
+import "./Styles/board.css";
 // import { dijkstra, getNodesShortestPath } from './algorithms/Dijkstra';
-import { aStar, getNodesShortestPathAstar } from './algorithms/Astar';
+import { aStar, getNodesShortestPathAstar } from "./algorithms/Astar";
+import navigation from "./components/controlBar";
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
 const FINISH_NODE_ROW = 10;
 const FINISH_NODE_COL = 35;
 
-class Tile extends React.Component {
+class Node extends React.Component {
     render() {
         const {
             col,
@@ -22,12 +23,12 @@ class Tile extends React.Component {
         } = this.props;
 
         const extraClassName = isFinish
-            ? 'node-finish'
+            ? "node-finish"
             : isStart
-                ? 'node-start'
-                : isWall
-                    ? 'node-wall'
-                    : '';
+            ? "node-start"
+            : isWall
+            ? "node-wall"
+            : "";
         return (
             <div
                 id={`node-${row}-${col}`}
@@ -36,24 +37,23 @@ class Tile extends React.Component {
                 onMouseEnter={() => onMouseEnter(row, col)}
                 onMouseUp={() => onMouseUp()}
             ></div>
-        )
+        );
     }
 }
 
 class Board extends React.Component {
-
-    constructor (props) {
+    constructor(props) {
         super(props);
         this.state = {
             grid: [],
             mouseIsPressed: false,
-            alg: 'djikstra'
-        }
-        this.handleAlgorithm = this.handleAlgorithm.bind(this)
+            alg: "djikstra",
+        };
+        this.handleAlgorithm = this.handleAlgorithm.bind(this);
     }
 
     handleAlgorithm() {
-        this.visualizeDijkstra();
+        this.visualizeAlgorithm();
     }
 
     componentDidMount() {
@@ -76,16 +76,53 @@ class Board extends React.Component {
         this.setState({ mouseIsPressed: false });
     }
 
-    visualizeDijkstra() {
+    clearBoard() {
+        console.log("Clear Board");
+        const { grid } = this.state;
+        for (let row = 0; row < 30; row++) {
+            for (let col = 0; col < 50; col++) {
+                if (grid[row][col].isWall) {
+                    grid[row][col].isWall = !grid[row][col].isWall;
+                }
+
+                if (row === START_NODE_ROW && col === START_NODE_COL) {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        "node node-start";
+                } else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        "node node-finish";
+                } else {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        "node";
+                }
+            }
+        }
+        this.state.grid = getInitialGrid;
+        this.setState({ grid });
+    }
+
+    selectStart() {
+        console.log("Select Start");
+    }
+
+    selectEnd() {
+        console.log("Select End");
+    }
+
+    setWall() {
+        console.log("Set Wall");
+    }
+
+    visualizeAlgorithm() {
         const { grid } = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
         const vistitedNodesInOrder = aStar(grid, startNode, endNode);
         const nodeShortestPath = getNodesShortestPathAstar(endNode);
-        this.animateDijkstra(vistitedNodesInOrder, nodeShortestPath);
+        this.animateAlgorithm(vistitedNodesInOrder, nodeShortestPath);
     }
 
-    animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
+    animateAlgorithm(visitedNodesInOrder, nodesInShortestPathOrder) {
         for (let i = 0; i <= visitedNodesInOrder.length; i++) {
             if (i === visitedNodesInOrder.length) {
                 setTimeout(() => {
@@ -95,8 +132,9 @@ class Board extends React.Component {
             }
             setTimeout(() => {
                 const node = visitedNodesInOrder[i];
-                document.getElementById(`node-${node.row}-${node.col}`).className =
-                    'node node-visited';
+                document.getElementById(
+                    `node-${node.row}-${node.col}`
+                ).className = "node node-visited";
             }, 10 * i);
         }
     }
@@ -105,52 +143,86 @@ class Board extends React.Component {
         for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
             setTimeout(() => {
                 const node = nodesInShortestPathOrder[i];
-                document.getElementById(`node-${node.row}-${node.col}`).className =
-                    'node node-shortest-path';
+                document.getElementById(
+                    `node-${node.row}-${node.col}`
+                ).className = "node node-shortest-path";
             }, 50 * i);
         }
     }
 
     render() {
-        const { grid } = this.state
+        const { grid } = this.state;
         return (
-            <div className='container' id='container'>
-                <button onClick={() => this.handleAlgorithm()}>Visualize</button>
-                <div className='Board'>
-                    {grid.map((row, rowIndex) => {
-                        return (
-                            <div className='Row' key={rowIndex}>
-                                {
-                                    row.map((node, nodeIndex) => {
-                                        const { row, col, isFinish, isStart, isWall } = node;
+            <>
+                <navigation.ControlBar
+                    handleAlgorithm={() => {
+                        this.handleAlgorithm();
+                    }}
+                    clearBoard={() => {
+                        this.clearBoard();
+                    }}
+                    selectStart={() => {
+                        this.selectStart();
+                    }}
+                    selectEnd={() => {
+                        this.selectEnd();
+                    }}
+                    setWall={() => {
+                        this.setWall();
+                    }}
+                />
+                <div className="container" id="container">
+                    <div className="Board">
+                        {grid.map((row, rowIndex) => {
+                            return (
+                                <div className="Row" key={rowIndex}>
+                                    {row.map((node, nodeIndex) => {
+                                        const {
+                                            row,
+                                            col,
+                                            isFinish,
+                                            isStart,
+                                            isWall,
+                                        } = node;
                                         return (
-                                            <Tile
+                                            <Node
                                                 key={nodeIndex}
                                                 col={col}
                                                 isFinish={isFinish}
                                                 isStart={isStart}
                                                 isWall={isWall}
-                                                onMouseDown={(row, col) => this.handleMouseDown(row, col)}
-                                                onMouseEnter={(row, col) =>
-                                                    this.handleMouseEnter(row, col)
+                                                onMouseDown={(row, col) =>
+                                                    this.handleMouseDown(
+                                                        row,
+                                                        col
+                                                    )
                                                 }
-                                                onMouseUp={() => this.handleMouseUp()}
+                                                onMouseEnter={(row, col) =>
+                                                    this.handleMouseEnter(
+                                                        row,
+                                                        col
+                                                    )
+                                                }
+                                                onMouseUp={() =>
+                                                    this.handleMouseUp()
+                                                }
                                                 row={row}
                                             />
                                         );
                                     })}
-                            </div>
-                        );
-                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
-        )
+            </>
+        );
     }
 }
 
 const getInitialGrid = () => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 30; row++) {
         const currentRow = [];
         for (let col = 0; col < 50; col++) {
             currentRow.push(createNode(col, row));
@@ -170,9 +242,9 @@ const createNode = (col, row) => {
         priorities: Infinity,
         isVisited: false,
         isWall: false,
-        s: Infinity,       // A-Star 
-        h: Infinity,   // Heuristic Score
-        f: Infinity,           // Sum of score and heuristic
+        s: Infinity, // A-Star
+        h: Infinity, // Heuristic Score
+        f: Infinity, // Sum of score and heuristic
         previousNode: null,
     };
 };
@@ -181,7 +253,7 @@ const getNewGridWithWallToggled = (grid, row, col) => {
     const newGrid = grid.slice();
     const node = newGrid[row][col];
     const newNode = {
-        ...node,
+        node,
         isWall: !node.isWall,
     };
     newGrid[row][col] = newNode;
