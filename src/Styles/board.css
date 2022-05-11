@@ -2,12 +2,6 @@
     background-color: #999;
 }
 
-.Tile:hover {
-    background-color: #999;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
-    opacity: 1;
-}
-
 .Row {
     display: flex;
 }

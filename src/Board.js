@@ -2,6 +2,7 @@ import React from 'react';
 import './Styles/board.css';
 // import { dijkstra, getNodesShortestPath } from './algorithms/Dijkstra';
 import { aStar, getNodesShortestPathAstar } from './algorithms/Astar';
+import Nav from './components/controlBar';
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
@@ -47,13 +48,38 @@ class Board extends React.Component {
         this.state = {
             grid: [],
             mouseIsPressed: false,
-            alg: 'djikstra'
+            alg: 'djikstra',
+            selectStart: false,
+            selectEnd: false,
+            setWall: false
         }
         this.handleAlgorithm = this.handleAlgorithm.bind(this)
     }
 
     handleAlgorithm() {
         this.visualizeDijkstra();
+    }
+
+    clearBoard() {
+        let { grid } = this.state;
+        for (let row = 0; row < 25; row++) {
+            for (let col = 0; col < 52; col++) {
+                if (grid[row][col].isStart) {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        'node node-start';
+                }
+                else if (grid[row][col].isFinish) {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        'node node-finish';
+                }
+                else {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        'node';
+                }
+            }
+        }
+        grid = getInitialGrid();
+        this.setState({ grid });
     }
 
     componentDidMount() {
@@ -147,7 +173,10 @@ class Board extends React.Component {
         const { grid } = this.state
         return (
             <div className='container' id='container'>
-                <button onClick={() => this.handleAlgorithm()}>Visualize</button>
+                <Nav.ControlBar
+                    handleAlgorithm={() => this.handleAlgorithm()}
+                    clearBoard={() => this.clearBoard()}
+                />
                 {this.createBoard(grid)}
             </div>
         )
@@ -156,9 +185,9 @@ class Board extends React.Component {
 
 const getInitialGrid = () => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < 25; row++) {
         const currentRow = [];
-        for (let col = 0; col < 50; col++) {
+        for (let col = 0; col < 52; col++) {
             currentRow.push(createNode(col, row));
         }
         grid.push(currentRow);
