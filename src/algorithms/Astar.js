@@ -23,8 +23,7 @@ export function aStar(grid, startNode, endNode) {
             if (path < neighbor.s) {
                 neighbor.s = path;
                 neighbor.previousNode = currentNode;
-                neighbor.h = Heuristic(neighbor, endNode);
-                neighbor.f = path + neighbor.h;
+                neighbor.f = path + Heuristic(neighbor, endNode);
             }
         }
     }
