@@ -4,10 +4,13 @@ import './Styles/board.css';
 import { aStar, getNodesShortestPathAstar } from './algorithms/Astar';
 import Nav from './components/controlBar';
 
-const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35;
+var START_NODE_ROW = 10;
+var START_NODE_COL = 15;
+var FINISH_NODE_ROW = 10;
+var FINISH_NODE_COL = 35;
+
+const ROW_COUNT = 25;
+const COL_COUNT = 51;
 
 class Tile extends React.Component {
     render() {
@@ -48,7 +51,7 @@ class Board extends React.Component {
         this.state = {
             grid: [],
             mouseIsPressed: false,
-            alg: 'djikstra',
+            alg: 'aStar',
             selectStart: false,
             selectEnd: false,
             setWall: false
@@ -57,13 +60,13 @@ class Board extends React.Component {
     }
 
     handleAlgorithm() {
-        this.visualizeDijkstra();
+        this.visualizeAlgorithm();
     }
 
     clearBoard() {
         let { grid } = this.state;
-        for (let row = 0; row < 25; row++) {
-            for (let col = 0; col < 52; col++) {
+        for (let row = 0; row < ROW_COUNT; row++) {
+            for (let col = 0; col < COL_COUNT; col++) {
                 if (grid[row][col].isStart) {
                     document.getElementById(`node-${row}-${col}`).className =
                         'node node-start';
@@ -88,8 +91,44 @@ class Board extends React.Component {
     }
 
     handleMouseDown(row, col) {
-        const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-        this.setState({ grid: newGrid, mouseIsPressed: true });
+        if (!this.state.selectStart && !this.state.selectEnd) {
+            const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+            this.setState({ grid: newGrid, mouseIsPressed: true });
+        }
+
+        else if (!this.state.selectEnd) { // select start
+            let oldRow = START_NODE_ROW;
+            let oldCol = START_NODE_COL;
+            let { grid } = this.state;
+            //
+            grid[oldRow][oldCol].isStart = false;
+            document.getElementById(`node-${oldRow}-${oldCol}`).className =
+                'node';
+            //
+            grid[row][col].isStart = true;
+            document.getElementById(`node-${row}-${col}`).className =
+                'node node-start';
+            START_NODE_ROW = row;
+            START_NODE_COL = col;
+            this.setState({ grid, selectStart: false, selectEnd: false });
+        }
+
+        else if (!this.state.selectStart) {
+            let oldRow = FINISH_NODE_ROW;
+            let oldCol = FINISH_NODE_COL;
+            let { grid } = this.state;
+            //
+            grid[oldRow][oldCol].isFinish = false;
+            document.getElementById(`node-${oldRow}-${oldCol}`).className =
+                'node';
+            //
+            grid[row][col].isFinish = true;
+            document.getElementById(`node-${row}-${col}`).className =
+                'node node-finish';
+            FINISH_NODE_ROW = row;
+            FINISH_NODE_COL = col;
+            this.setState({ grid, selectStart: false, selectEnd: false });
+        }
     }
 
     handleMouseEnter(row, col) {
@@ -102,16 +141,30 @@ class Board extends React.Component {
         this.setState({ mouseIsPressed: false });
     }
 
-    visualizeDijkstra() {
+    async selectStart() {
+        if (this.state.selectEnd) {
+            this.setState({ selectEnd: false })
+        }
+        await this.setState({ selectStart: true })
+    }
+
+    async selectEnd() {
+        if (this.state.selectStart) {
+            this.setState({ selectStart: false })
+        }
+        await this.setState({ selectEnd: true })
+    }
+
+    visualizeAlgorithm() {
         const { grid } = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
         const vistitedNodesInOrder = aStar(grid, startNode, endNode);
         const nodeShortestPath = getNodesShortestPathAstar(endNode);
-        this.animateDijkstra(vistitedNodesInOrder, nodeShortestPath);
+        this.animateAlgorithm(vistitedNodesInOrder, nodeShortestPath);
     }
 
-    animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
+    animateAlgorithm(visitedNodesInOrder, nodesInShortestPathOrder) {
         for (let i = 0; i <= visitedNodesInOrder.length; i++) {
             if (i === visitedNodesInOrder.length) {
                 setTimeout(() => {
@@ -176,6 +229,8 @@ class Board extends React.Component {
                 <Nav.ControlBar
                     handleAlgorithm={() => this.handleAlgorithm()}
                     clearBoard={() => this.clearBoard()}
+                    selectStart={() => this.selectStart()}
+                    selectEnd={() => this.selectEnd()}
                 />
                 {this.createBoard(grid)}
             </div>
@@ -185,9 +240,9 @@ class Board extends React.Component {
 
 const getInitialGrid = () => {
     const grid = [];
-    for (let row = 0; row < 25; row++) {
+    for (let row = 0; row < ROW_COUNT; row++) {
         const currentRow = [];
-        for (let col = 0; col < 52; col++) {
+        for (let col = 0; col < COL_COUNT; col++) {
             currentRow.push(createNode(col, row));
         }
         grid.push(currentRow);
