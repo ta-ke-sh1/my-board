@@ -3,7 +3,7 @@ import "./../Styles/navigation.css";
 
 class ControlBar extends React.Component {
     render() {
-        const { handleAlgorithm, clearBoard, selectStart, selectEnd, selectAlgorithm } =
+        const { handleAlgorithm, clearBoard, selectAlgorithm } =
             this.props;
         return (
             <div className="navigation-bar">
@@ -14,20 +14,14 @@ class ControlBar extends React.Component {
                 <div className="btn" onMouseDown={() => clearBoard()}>
                     Clear Board
                 </div>
-                <div className="btn" onMouseDown={() => selectStart()}>
-                    Select Start
-                </div>
-                <div className="btn" onMouseDown={() => selectEnd()}>
-                    Select End
-                </div>
                 <div className="disabled">
                     Select an Algorithm: 
                 </div>
                 <select name="" id="" className="btn" onChange={event => selectAlgorithm(event)}>
-                    <option value="aStar">A* - A-Star</option>
+                    <option value="aStar">A-Star</option>
                     <option value="djikstra">Djikstra</option>
+                    <option value="bellmanFord">Bellman-Ford</option>
                     <option value="bfs">Bread First Search</option>
-                    <option value="randomWalk">Random Walk</option>
                     <option value="dfs">Depth First Search</option>
                 </select>
                 <div className="btn" onMouseDown={() => handleAlgorithm()} id='visualize' >

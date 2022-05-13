@@ -21,6 +21,11 @@
     color: crimson;
 }
 
+.selected{
+    background-color: crimson;
+    color: white;
+}
+
 .navigation-bar .disabled {
     float: left;
     margin: auto;
