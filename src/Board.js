@@ -1,13 +1,13 @@
 import React from 'react';
 import './Styles/board.css';
-// import { dijkstra, getNodesShortestPath } from './algorithms/Dijkstra';
-import { aStar, getNodesShortestPathAstar } from './algorithms/Astar';
+import { dijkstra, getNodesShortestPath } from './algorithms/Dijkstra';
+import { aStar } from './algorithms/Astar';
 import Nav from './components/controlBar';
 
-var START_NODE_ROW = 10;
+var START_NODE_ROW = 11;
 var START_NODE_COL = 15;
-var FINISH_NODE_ROW = 10;
-var FINISH_NODE_COL = 35;
+var FINISH_NODE_ROW = 11;
+var FINISH_NODE_COL = 32;
 
 const ROW_COUNT = 25;
 const COL_COUNT = 51;
@@ -57,6 +57,7 @@ class Board extends React.Component {
             setWall: false
         }
         this.handleAlgorithm = this.handleAlgorithm.bind(this)
+        this.selectAlgorithm = this.selectAlgorithm.bind(this)
     }
 
     handleAlgorithm() {
@@ -85,6 +86,34 @@ class Board extends React.Component {
         this.setState({ grid });
     }
 
+    refreshBoard() {
+        let { grid } = this.state;
+        let walls = [];
+        for (let row = 0; row < ROW_COUNT; row++) {
+            for (let col = 0; col < COL_COUNT; col++) {
+                if (grid[row][col].isWall) {
+                    walls.push([row, col]);
+                }
+                else if (grid[row][col].isStart || grid[row][col].isFinish) {
+                    continue
+                }
+                else {
+                    document.getElementById(`node-${row}-${col}`).className =
+                        'node';
+                }
+            }
+        }
+        grid = getInitialGrid();
+        for (let i = 0; i < walls.length; i++){
+            document.getElementById(`node-${walls[i][0]}-${walls[i][1]}`).className =
+                'node node-wall';
+            let row = walls[i][0]
+            let col = walls[i][1]
+            grid[row][col].isWall = true;
+        }
+        this.setState({ grid });
+    }
+
     componentDidMount() {
         const grid = getInitialGrid();
         this.setState({ grid });
@@ -100,23 +129,25 @@ class Board extends React.Component {
             let oldRow = START_NODE_ROW;
             let oldCol = START_NODE_COL;
             let { grid } = this.state;
-            //
+
+            // clear old finish node
             grid[oldRow][oldCol].isStart = false;
             document.getElementById(`node-${oldRow}-${oldCol}`).className =
                 'node';
-            //
+            // assign new start node
             grid[row][col].isStart = true;
             document.getElementById(`node-${row}-${col}`).className =
                 'node node-start';
             START_NODE_ROW = row;
             START_NODE_COL = col;
-            this.setState({ grid, selectStart: false, selectEnd: false });
+            this.setState({ grid, selectStart: false });
         }
 
         else if (!this.state.selectStart) {
             let oldRow = FINISH_NODE_ROW;
             let oldCol = FINISH_NODE_COL;
             let { grid } = this.state;
+
             //
             grid[oldRow][oldCol].isFinish = false;
             document.getElementById(`node-${oldRow}-${oldCol}`).className =
@@ -127,7 +158,7 @@ class Board extends React.Component {
                 'node node-finish';
             FINISH_NODE_ROW = row;
             FINISH_NODE_COL = col;
-            this.setState({ grid, selectStart: false, selectEnd: false });
+            this.setState({ grid, selectEnd: false });
         }
     }
 
@@ -155,12 +186,32 @@ class Board extends React.Component {
         await this.setState({ selectEnd: true })
     }
 
+    async selectAlgorithm(event) {
+        await this.setState({ alg: event.target.value })
+    }
+
     visualizeAlgorithm() {
+        this.refreshBoard();
         const { grid } = this.state;
         const startNode = grid[START_NODE_ROW][START_NODE_COL];
         const endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-        const vistitedNodesInOrder = aStar(grid, startNode, endNode);
-        const nodeShortestPath = getNodesShortestPathAstar(endNode);
+        const alg = this.state.alg;
+        let vistitedNodesInOrder = [];
+        let nodeShortestPath = [];
+        if (alg === 'djikstra') {
+            vistitedNodesInOrder = dijkstra(grid, startNode, endNode);
+            nodeShortestPath = getNodesShortestPath(endNode);
+            console.log(endNode.previousNode);
+        }
+        else if (alg === 'aStar') {
+            vistitedNodesInOrder = aStar(grid, startNode, endNode);
+            nodeShortestPath = getNodesShortestPath(endNode);
+            console.log(endNode.previousNode);
+        }
+        else {
+            console.log('Awaiting implementation!');
+            return;
+        }
         this.animateAlgorithm(vistitedNodesInOrder, nodeShortestPath);
     }
 
@@ -231,6 +282,7 @@ class Board extends React.Component {
                     clearBoard={() => this.clearBoard()}
                     selectStart={() => this.selectStart()}
                     selectEnd={() => this.selectEnd()}
+                    selectAlgorithm={(event) => this.selectAlgorithm(event)}
                 />
                 {this.createBoard(grid)}
             </div>

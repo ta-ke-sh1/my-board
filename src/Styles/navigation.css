@@ -5,13 +5,28 @@
     width: 100%;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
     background-color: white;
+    padding: 10px;
 }
 
 .navigation-bar .btn {
     float: left;
     margin: auto;
     text-decoration: none;
-    padding: 25px;
+    padding: 15px;
+    border: 1px solid transparent;
+    transition-duration: 0.3s;
+    border: 1px solid crimson;
+    border-radius: 10px;
+    margin-right: 20px;
+    color: crimson;
+}
+
+.navigation-bar .disabled {
+    float: left;
+    margin: auto;
+    margin-left: 10px;
+    text-decoration: none;
+    padding: 15px;
     border: 1px solid transparent;
     transition-duration: 0.3s;
 }
@@ -20,4 +35,8 @@
     border: 1px solid crimson;
     color: crimson;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
+}
+
+#visualize{
+    margin-left: 20px;
 }
