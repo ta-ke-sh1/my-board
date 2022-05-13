@@ -3,9 +3,9 @@
     left: 0;
     top: 0;
     width: 100%;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
     background-color: white;
-    padding: 10px;
+    padding: 25px;
 }
 
 .navigation-bar .btn {
@@ -14,7 +14,7 @@
     text-decoration: none;
     padding: 15px;
     border: 1px solid transparent;
-    transition-duration: 0.3s;
+    transition-duration: 0.4s;
     border: 1px solid crimson;
     border-radius: 10px;
     margin-right: 20px;
@@ -29,7 +29,6 @@
 .navigation-bar .disabled {
     float: left;
     margin: auto;
-    margin-left: 10px;
     text-decoration: none;
     padding: 15px;
     border: 1px solid transparent;
@@ -42,6 +41,43 @@
     box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;
 }
 
-#visualize{
-    margin-left: 20px;
+.right{
+    float: right;
+    margin-right: 40px;
 }
+
+#visualize{
+    border: 1px solid transparent;
+    color: white;
+    margin-right: 40px;
+    animation-name: visualize;
+    animation-duration: 1.75s;
+    animation-timing-function: ease-out;
+    animation-delay: 0;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+    rotate: -20deg;
+}
+
+@keyframes visualize {
+    0% {
+        background-color: #f794a4;
+    }
+
+    100% {
+        background-color: #fabe99;
+    }
+}
+
+#app-name{
+    float: left;
+    margin: auto;
+    margin-left: 10px;
+    margin-right: 20px;
+    color: crimson;
+    border-radius: 25px;
+}
+
+
