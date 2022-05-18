@@ -8,8 +8,7 @@
     src: url(./fonts/NeueHaasGroteskText-Regular.otf);
 }
 
-
-body{
+body {
     font-family: NeueHass;
 }
 
@@ -44,7 +43,7 @@ body{
     margin-top: -1px;
     min-width: 36px;
     max-width: 36px;
-    transition-duration: 0.4s;
+    transition-duration: 0.2s;
     transition-timing-function: ease-out;
 }
 
@@ -120,6 +119,7 @@ body{
     }
 }
 
-select, option{
+select,
+option {
     font-family: NeueHass;
 }

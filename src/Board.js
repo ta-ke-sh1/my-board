@@ -1,10 +1,10 @@
-import React from 'react';
-import './Styles/board.css';
-import { dijkstra, getNodesShortestPath } from './algorithms/Dijkstra';
-import { aStar } from './algorithms/Astar';
-import { bfs } from './algorithms/BreadthFirstSearch'
-import { bellmanFord } from './algorithms/BellmanFord';
-import Nav from './components/controlBar';
+import React from "react";
+import "./Styles/board.css";
+import { dijkstra, getNodesShortestPath } from "./algorithms/Dijkstra";
+import { aStar } from "./algorithms/Astar";
+import { bfs } from "./algorithms/BreadthFirstSearch";
+import { bellmanFord } from "./algorithms/BellmanFord";
+import Nav from "./components/controlBar";
 
 var START_NODE_ROW = 11;
 var START_NODE_COL = 12;
@@ -25,16 +25,16 @@ class Tile extends React.Component {
             onMouseEnter,
             onMouseUp,
             row,
-            handleDrag
+            handleDrag,
         } = this.props;
 
         const extraClassName = isFinish
-            ? 'node-finish'
+            ? "node-finish"
             : isStart
-                ? 'node-start'
-                : isWall
-                    ? 'node-wall'
-                    : '';
+            ? "node-start"
+            : isWall
+            ? "node-wall"
+            : "";
         return (
             <div
                 id={`node-${row}-${col}`}
@@ -44,28 +44,27 @@ class Tile extends React.Component {
                 onMouseUp={() => onMouseUp()}
                 onDrag={() => handleDrag(row, col)}
             ></div>
-        )
+        );
     }
 }
 
 class Board extends React.Component {
-
-    constructor (props) {
+    constructor(props) {
         super(props);
         this.state = {
             grid: [],
             mouseIsPressed: false,
-            alg: 'aStar',
+            alg: "aStar",
             selectStart: false,
             selectEnd: false,
             setWall: false,
             startDrag: false,
             finishDrag: false,
             complexity: 35,
-        }
-        this.handleAlgorithm = this.handleAlgorithm.bind(this)
-        this.selectAlgorithm = this.selectAlgorithm.bind(this)
-        this.selectComplexity = this.selectComplexity.bind(this)
+        };
+        this.handleAlgorithm = this.handleAlgorithm.bind(this);
+        this.selectAlgorithm = this.selectAlgorithm.bind(this);
+        this.selectComplexity = this.selectComplexity.bind(this);
     }
 
     /// ------------------------------ Handling events ------------------------------
@@ -77,25 +76,30 @@ class Board extends React.Component {
     handleMouseDown(row, col) {
         let { grid } = this.state;
         if (row === START_NODE_ROW && col === START_NODE_COL) {
-            this.setState({ selectStart: true, selectEnd: false })
-        }
-        else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) {
-            this.setState({ selectEnd: true, selectStart: false })
-        }
-
-        else if (!this.state.selectStart && !this.state.selectEnd) {
-            const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+            this.setState({
+                selectStart: true,
+                selectEnd: false,
+                startDrag: true,
+            });
+        } else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) {
+            this.setState({
+                selectEnd: true,
+                selectStart: false,
+                finishDrag: true,
+            });
+        } else if (!this.state.selectStart && !this.state.selectEnd) {
+            const newGrid = getNewGridWithWallToggled(
+                this.state.grid,
+                row,
+                col
+            );
             this.setState({ grid: newGrid, mouseIsPressed: true });
-        }
-
-        else if (!this.state.selectEnd) { // select start
+        } else if (!this.state.selectEnd) {
             changeStartNode(row, col, grid);
             this.setState({ grid, selectStart: false, selectEnd: false });
-        }
-
-        else if (!this.state.selectStart) {
+        } else if (!this.state.selectStart) {
             changeFinishNode(row, col, grid);
-            this.setState({ grid, selectEnd: false, selectStart: false, });
+            this.setState({ grid, selectEnd: false, selectStart: false });
         }
     }
 
@@ -103,31 +107,44 @@ class Board extends React.Component {
         let { grid } = this.state;
         if (this.state.startDrag) {
             changeStartNode(row, col, grid);
-            this.setState({ grid, selectStart: false, startDrag: false });
+            this.setState({ selectStart: false });
         }
 
         if (this.state.finishDrag) {
             changeFinishNode(row, col, grid);
-            this.setState({ grid, selectEnd: false, finishDrag: false });
+            this.setState({ selectEnd: false });
         }
 
         if (!this.state.mouseIsPressed) return;
         else {
-            const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-            this.setState({ grid: newGrid });
+            if (!this.state.selectStart && !this.state.selectEnd) {
+                const newGrid = getNewGridWithWallToggled(
+                    this.state.grid,
+                    row,
+                    col
+                );
+                this.setState({ grid: newGrid, mouseIsPressed: true });
+            } else if (!this.state.selectEnd) {
+                // select start
+                changeStartNode(row, col, grid);
+            } else if (!this.state.selectStart) {
+                changeFinishNode(row, col, grid);
+            }
         }
     }
 
     handleMouseUp() {
-        this.setState({ mouseIsPressed: false, startDrag: false, finishDrag: false });
+        this.setState({
+            mouseIsPressed: false,
+            startDrag: false,
+            finishDrag: false,
+        });
     }
 
     handleDrag(row, col) {
         if (row === START_NODE_ROW && col === START_NODE_COL) {
             this.setState({ startDrag: true, finishDrag: false });
-        }
-
-        else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) {
+        } else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) {
             this.setState({ finishDrag: true, startDrag: false });
         }
     }
@@ -135,14 +152,14 @@ class Board extends React.Component {
     async selectComplexity(event) {
         let type = event.target.value;
         let complexity = 0;
-        if (type === 'low') complexity = 35;
-        else if (type === 'medium') complexity = 40;
+        if (type === "low") complexity = 35;
+        else if (type === "medium") complexity = 40;
         else complexity = 45;
-        await this.setState({ complexity: complexity })
+        await this.setState({ complexity: complexity });
     }
 
     async selectAlgorithm(event) {
-        await this.setState({ alg: event.target.value })
+        await this.setState({ alg: event.target.value });
     }
     /// ------------------------------ Handling events ------------------------------
 
@@ -157,18 +174,16 @@ class Board extends React.Component {
                 grid[row][col].isVisited = false;
                 if (grid[row][col].isStart) {
                     document.getElementById(`node-${row}-${col}`).className =
-                        'node node-start';
-                }
-                else if (grid[row][col].isFinish) {
+                        "node node-start";
+                } else if (grid[row][col].isFinish) {
                     document.getElementById(`node-${row}-${col}`).className =
-                        'node node-finish';
-                }
-                else {
+                        "node node-finish";
+                } else {
                     if (grid[row][col].isWall) {
                         grid[row][col].isWall = false;
                     }
                     document.getElementById(`node-${row}-${col}`).className =
-                        'node';
+                        "node";
                 }
             }
         }
@@ -184,23 +199,21 @@ class Board extends React.Component {
                 grid[row][col].isVisited = false;
                 if (grid[row][col].isWall) {
                     walls.push([row, col]);
-                }
-                else if (grid[row][col].isStart || grid[row][col].isFinish) {
-                    continue
-                }
-                else {
-
+                } else if (grid[row][col].isStart || grid[row][col].isFinish) {
+                    continue;
+                } else {
                     document.getElementById(`node-${row}-${col}`).className =
-                        'node';
+                        "node";
                 }
             }
         }
         grid = getInitialGrid();
         for (let i = 0; i < walls.length; i++) {
-            document.getElementById(`node-${walls[i][0]}-${walls[i][1]}`).className =
-                'node node-wall';
-            let row = walls[i][0]
-            let col = walls[i][1]
+            document.getElementById(
+                `node-${walls[i][0]}-${walls[i][1]}`
+            ).className = "node node-wall";
+            let row = walls[i][0];
+            let col = walls[i][1];
             grid[row][col].isWall = true;
         }
         this.setState({ grid });
@@ -213,18 +226,21 @@ class Board extends React.Component {
         for (let row = 0; row < 25; row++) {
             for (let col = 0; col < 51; col++) {
                 grid[row][col].isVisited = false;
-                let chance = Math.floor(Math.random() * 100) + 10 < this.state.complexity ? true : false;
+                let chance =
+                    Math.floor(Math.random() * 100) + 10 < this.state.complexity
+                        ? true
+                        : false;
                 if (
-                    (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
-                    || (row === START_NODE_ROW && col === START_NODE_COL)) {
+                    (row === FINISH_NODE_ROW && col === FINISH_NODE_COL) ||
+                    (row === START_NODE_ROW && col === START_NODE_COL)
+                ) {
                     continue;
-                }
-                else if (!chance) {
+                } else if (!chance) {
                     continue;
-                }
-                else {
+                } else {
                     grid[row][col].isWall = true;
-                    document.getElementById(`node-${row}-${col}`).className = 'node node-wall';
+                    document.getElementById(`node-${row}-${col}`).className =
+                        "node node-wall";
                 }
             }
         }
@@ -240,16 +256,15 @@ class Board extends React.Component {
         const alg = this.state.alg;
         let vistitedNodes = [];
         let shortestPath = [];
-        if (alg === 'djikstra')
+        if (alg === "djikstra")
             vistitedNodes = dijkstra(grid, startNode, endNode);
-        else if (alg === 'aStar')
+        else if (alg === "aStar")
             vistitedNodes = aStar(grid, startNode, endNode);
-        else if (alg === 'bfs')
-            vistitedNodes = bfs(grid, startNode, endNode);
-        else if (alg === 'bellmanFord')
+        else if (alg === "bfs") vistitedNodes = bfs(grid, startNode, endNode);
+        else if (alg === "bellmanFord")
             vistitedNodes = bellmanFord(grid, startNode, endNode);
         else {
-            console.log('Awaiting implementation!');
+            console.log("Awaiting implementation!");
             return;
         }
         shortestPath = getNodesShortestPath(endNode);
@@ -267,8 +282,9 @@ class Board extends React.Component {
             setTimeout(() => {
                 const node = visitedNodes[i];
 
-                document.getElementById(`node-${node.row}-${node.col}`).className =
-                    'node node-visited';
+                document.getElementById(
+                    `node-${node.row}-${node.col}`
+                ).className = "node node-visited";
             }, 10 * i);
         }
     }
@@ -277,49 +293,54 @@ class Board extends React.Component {
         for (let i = 0; i < shortestPath.length; i++) {
             setTimeout(() => {
                 const node = shortestPath[i];
-                document.getElementById(`node-${node.row}-${node.col}`).className =
-                    'node node-shortest-path';
-            }, 50 * i);
+                document.getElementById(
+                    `node-${node.row}-${node.col}`
+                ).className = "node node-shortest-path";
+            }, 40 * i);
         }
     }
 
     createBoard(grid) {
         return (
-            <div className='Board'>
+            <div className="Board">
                 {grid.map((row, rowIndex) => {
                     return (
-                        <div className='Row' key={rowIndex}>
-                            {
-                                row.map((node, nodeIndex) => {
-                                    const { row, col, isFinish, isStart, isWall } = node;
-                                    return (
-                                        <Tile
-                                            key={nodeIndex}
-                                            col={col}
-                                            row={row}
-                                            isFinish={isFinish}
-                                            isStart={isStart}
-                                            isWall={isWall}
-                                            onMouseDown={(row, col) => this.handleMouseDown(row, col)}
-                                            onMouseEnter={(row, col) =>
-                                                this.handleMouseEnter(row, col)
-                                            }
-                                            onMouseUp={() => this.handleMouseUp()}
-                                            handleDrag={(row, col) => this.handleDrag(row, col)}
-                                        />
-                                    );
-                                })}
+                        <div className="Row" key={rowIndex}>
+                            {row.map((node, nodeIndex) => {
+                                const { row, col, isFinish, isStart, isWall } =
+                                    node;
+                                return (
+                                    <Tile
+                                        key={nodeIndex}
+                                        col={col}
+                                        row={row}
+                                        isFinish={isFinish}
+                                        isStart={isStart}
+                                        isWall={isWall}
+                                        onMouseDown={(row, col) =>
+                                            this.handleMouseDown(row, col)
+                                        }
+                                        onMouseEnter={(row, col) =>
+                                            this.handleMouseEnter(row, col)
+                                        }
+                                        onMouseUp={() => this.handleMouseUp()}
+                                        handleDrag={(row, col) =>
+                                            this.handleDrag(row, col)
+                                        }
+                                    />
+                                );
+                            })}
                         </div>
                     );
                 })}
             </div>
-        )
+        );
     }
 
     render() {
         const { grid } = this.state;
         return (
-            <div className='container' id='container'>
+            <div className="container" id="container">
                 <Nav.ControlBar
                     handleAlgorithm={() => this.handleAlgorithm()}
                     clearBoard={() => this.clearBoard()}
@@ -329,7 +350,7 @@ class Board extends React.Component {
                 />
                 {this.createBoard(grid)}
             </div>
-        )
+        );
     }
 }
 
@@ -351,11 +372,11 @@ const createNode = (col, row) => {
         row,
         isStart: row === START_NODE_ROW && col === START_NODE_COL,
         isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
-        distance: Infinity,  // Djikstra
+        distance: Infinity, // Djikstra
         isVisited: false,
         isWall: false,
-        s: Infinity,         // A-Star 
-        f: Infinity,         // Sum of score and heuristic
+        s: Infinity, // A-Star
+        f: Infinity, // Sum of score and heuristic
         previousNode: null,
     };
 };
@@ -376,12 +397,10 @@ function changeStartNode(row, col, grid) {
     let oldCol = START_NODE_COL;
     // clear old finish node
     grid[oldRow][oldCol].isStart = false;
-    document.getElementById(`node-${oldRow}-${oldCol}`).className =
-        'node';
+    document.getElementById(`node-${oldRow}-${oldCol}`).className = "node";
     // assign new start node
     grid[row][col].isStart = true;
-    document.getElementById(`node-${row}-${col}`).className =
-        'node node-start';
+    document.getElementById(`node-${row}-${col}`).className = "node node-start";
     START_NODE_ROW = row;
     START_NODE_COL = col;
 }
@@ -391,12 +410,11 @@ function changeFinishNode(row, col, grid) {
     let oldCol = FINISH_NODE_COL;
     //
     grid[oldRow][oldCol].isFinish = false;
-    document.getElementById(`node-${oldRow}-${oldCol}`).className =
-        'node';
+    document.getElementById(`node-${oldRow}-${oldCol}`).className = "node";
     //
     grid[row][col].isFinish = true;
     document.getElementById(`node-${row}-${col}`).className =
-        'node node-finish';
+        "node node-finish";
     FINISH_NODE_ROW = row;
     FINISH_NODE_COL = col;
 }
